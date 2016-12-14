@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
+using System.Linq.Expressions;
+using System.Reflection;
 
 namespace IocContainer
 {
@@ -22,31 +21,65 @@ namespace IocContainer
             var tuple = _cache.SingleOrDefault(x => x.Item1 == typeof(T));
             if (tuple == null)
             {
-                throw new NullReferenceException("Object has not been registered");
+                throw new NullReferenceException("Specified type has not been registered with the container");
             }
 
-            if (tuple.Item3 == LifestyleType.Transient)
-                return ResolveTransient(tuple);
+            if(tuple.Item3 == LifestyleType.Transient)
+                return GenerateObject<T>(tuple.Item2);
 
-            return ResolveSingleton(tuple);
-        }
-
-        private dynamic ResolveSingleton(Tuple<Type, Type, LifestyleType> tuple)
-        {
             var resolved = _singletons.SingleOrDefault(x => x.Item1 == tuple.Item1);
-            if (resolved == null)
-            {
-                var newObj = Activator.CreateInstance(tuple.Item2, new object());
-                _singletons.Add(new Tuple<Type, Type, object>(tuple.Item1, tuple.Item2, newObj));
-                return newObj;
-            }
+            if (resolved != null) return (T) resolved.Item3;
 
-            return resolved.Item3;
+            var newObj = GenerateObject<T>(tuple.Item2);
+            _singletons.Add(new Tuple<Type, Type, object>(tuple.Item1, tuple.Item2, newObj));
+            return newObj;
         }
 
-        private dynamic ResolveTransient(Tuple<Type, Type, LifestyleType> tuple)
+        private T GenerateObject<T>(Type resolvedType)
         {
-            return Activator.CreateInstance(tuple.Item2, new object());
+            var types = _cache.Select(x => x.Item2).ToList();
+            var valid = true;
+            var validConstructors = new List<ConstructorInfo>();
+            foreach(var t in resolvedType.GetConstructors())
+            {
+                if (t.GetParameters().Any(p => 
+                        types.All(x => x.ReflectedType != p.GetType().ReflectedType)))
+                {
+                    valid = false;
+                }
+                if (valid)
+                    validConstructors.Add(t);
+            }
+
+            if (!validConstructors.Any())
+            {
+                throw new NullReferenceException($"One or more types required by the constructor have not been registered");
+            }
+
+            var parameters = validConstructors[0].GetParameters().Select(x => x.ParameterType).ToArray();
+            if (!parameters.Any())
+            {
+                return (T) Activator.CreateInstance(resolvedType, new object[] {});
+            }
+
+            object[] paramObjects = GenerateParamaters(parameters).ToArray();
+            return (T) Activator.CreateInstance(resolvedType, paramObjects);
+        }
+
+        private IEnumerable<object> GenerateParamaters(Type[] paramTypes)
+        {
+            var resolveMethod = paramTypes.Select(param => typeof (Container)
+                .GetMethod("Resolve")).First();
+                
+
+            var paramaters = new List<object>();
+            foreach (var param in paramTypes)
+            {
+                resolveMethod.MakeGenericMethod(param);
+                paramaters.Add(resolveMethod.MakeGenericMethod(param).Invoke(this, new object[] {}));
+            }
+
+            return paramaters;
         }
     }
 

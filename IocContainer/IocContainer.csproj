@@ -50,9 +50,7 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
-    <Compile Include="Calculator.cs" />
     <Compile Include="Container.cs" />
-    <Compile Include="ICalculator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Choose>

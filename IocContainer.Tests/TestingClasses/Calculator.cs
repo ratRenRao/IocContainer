@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace IocContainer
+﻿namespace IocContainer.Tests.TestingClasses
 {
     public class Calculator : ICalculator
     {
+        public Calculator()
+        {
+        }
+
         public float Add(float x, float y)
         {
             return x + y;

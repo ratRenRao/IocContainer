@@ -69,6 +69,14 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="TestingClasses\Calculator.cs" />
+    <Compile Include="TestingClasses\Computer.cs" />
+    <Compile Include="TestingClasses\GraphingCalculator.cs" />
+    <Compile Include="TestingClasses\ICalculator.cs" />
+    <Compile Include="TestingClasses\IComputer.cs" />
+    <Compile Include="TestingClasses\IGraphingCalculator.cs" />
+    <Compile Include="TestingClasses\IScientificCalculator.cs" />
+    <Compile Include="TestingClasses\ScientificCalculator.cs" />
     <Compile Include="TransientContainerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

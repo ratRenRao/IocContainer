@@ -1,4 +1,5 @@
 ﻿using System;
+using IocContainer.Tests.TestingClasses;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Xunit;
 using Shouldly;
@@ -16,10 +17,9 @@ namespace IocContainer.Tests
         }
 
         [Fact]
-        public void container_stores_multiple_objects_of_same_type()
+        public void container_allows_type_registering()
         {
-            _container.Register<ICalculator, Calculator>();
-            _container.Register<ICalculator, Calculator>();
+            Should.NotThrow(() => _container.Register<ICalculator, Calculator>());
         }
 
         [Fact]
@@ -29,6 +29,7 @@ namespace IocContainer.Tests
             Calculator resolved1 = _container.Resolve<ICalculator>();
             resolved1.ShouldNotBeNull();
             Calculator resolved2 = _container.Resolve<ICalculator>();
+            resolved1.ShouldNotBeNull();
             resolved2.ShouldNotBeNull();
             resolved1.ShouldBeSameAs(resolved2);
         }
@@ -36,17 +37,39 @@ namespace IocContainer.Tests
         [Fact]
         public void container_resolves_transient_objects_correctly()
         {
-            _container.Register<ICalculator, Calculator>(LifestyleType.Singleton);
+            _container.Register<ICalculator, Calculator>(LifestyleType.Transient);
             Calculator resolved1 = _container.Resolve<ICalculator>();
             resolved1.ShouldNotBeNull();
             Calculator resolved2 = _container.Resolve<ICalculator>();
             resolved2.ShouldNotBeNull();
             resolved1.ShouldNotBeSameAs(resolved2);
-
         }
 
         [Fact]
-        public void container_registry_values_are_unique()
+        public void unregistered_type_resolution_errors()
+        {
+            Should.Throw<NullReferenceException>(() => _container.Resolve<ICalculator>());
+        }
+
+        [Fact]
+        public void container_autoresolves_valid_constructor_parameters()
+        {
+            _container.Register<ICalculator, Calculator>();
+            _container.Register<IScientificCalculator, ScientificCalculator>();
+            ScientificCalculator result = _container.Resolve<IScientificCalculator>();
+            result.ShouldNotBeNull();
+        }
+
+        [Fact]
+        public void resolve_fails_when_no_valid_constructors_found()
+        {
+            _container.Register<IGraphingCalculator, GraphingCalculator>();
+            _container.Register<IScientificCalculator, ScientificCalculator>();
+            Should.Throw<Exception>(() => _container.Resolve<IGraphingCalculator>());
+        }
+
+        [Fact]
+        public void container_attempts_autoresolve_for_all_constructors()
         {
             
         }
