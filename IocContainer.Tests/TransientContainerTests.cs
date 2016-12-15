@@ -1,9 +1,7 @@
 ﻿using System;
 using IocContainer.Tests.TestingClasses;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Xunit;
 using Shouldly;
-using Moq;
 
 namespace IocContainer.Tests
 {
@@ -23,7 +21,7 @@ namespace IocContainer.Tests
         }
 
         [Fact]
-        public void container_resolves_singleton_objects_correctly()
+        public void container_resolves_the_same_object_for_singleton_lifestyletypes()
         {
             _container.Register<ICalculator, Calculator>(LifestyleType.Singleton);
             Calculator resolved1 = _container.Resolve<ICalculator>();
@@ -35,18 +33,18 @@ namespace IocContainer.Tests
         }
 
         [Fact]
-        public void container_resolves_transient_objects_correctly()
+        public void container_resolves_new_object_for_transient_lifestyletypes()
         {
             _container.Register<ICalculator, Calculator>(LifestyleType.Transient);
             Calculator resolved1 = _container.Resolve<ICalculator>();
-            resolved1.ShouldNotBeNull();
             Calculator resolved2 = _container.Resolve<ICalculator>();
+            resolved1.ShouldNotBeNull();
             resolved2.ShouldNotBeNull();
             resolved1.ShouldNotBeSameAs(resolved2);
         }
 
         [Fact]
-        public void unregistered_type_resolution_errors()
+        public void attempting_to_resolve_unregistered_type_causes_exception()
         {
             Should.Throw<NullReferenceException>(() => _container.Resolve<ICalculator>());
         }

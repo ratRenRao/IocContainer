@@ -10,11 +10,11 @@ namespace IocContainer
     {
         private readonly List<Tuple<Type, Type, LifestyleType>> _cache = new List<Tuple<Type, Type, LifestyleType>>();
         private readonly List<Tuple<Type, Type, object>> _singletons = new List<Tuple<Type, Type, object>>();
-        private bool _resolvingParams = false;
+        private bool _resolvingParams;
 
-        public void Register<T, V>(LifestyleType lifestyle = LifestyleType.Transient) where V : T
+        public void Register<T, TV>(LifestyleType lifestyle = LifestyleType.Transient) where TV : T
         {
-            _cache.Add(new Tuple<Type, Type, LifestyleType>(typeof(T), typeof(V), lifestyle));
+            _cache.Add(new Tuple<Type, Type, LifestyleType>(typeof(T), typeof(TV), lifestyle));
         }
 
         public dynamic Resolve<T>()
@@ -28,13 +28,13 @@ namespace IocContainer
                 throw new NullReferenceException("The requested type has not been registered.");
             }
 
-            if(tuple.Item3 == LifestyleType.Transient)
-                return GenerateObject<T>(tuple.Item2);
+            if (tuple.Item3 == LifestyleType.Singleton)
+            {
+                var resolved = _singletons.SingleOrDefault(x => x.Item1 == tuple.Item1);
+                if (resolved != null) return (T) resolved.Item3;
+            }
 
-            var resolved = _singletons.SingleOrDefault(x => x.Item1 == tuple.Item1);
-            if (resolved != null) return (T) resolved.Item3;
-
-            var newObj = GenerateObject<T>(tuple.Item2);
+            var newObj = GenerateObject<T>(tuple.Item2, GetValidConstructors<T>(tuple.Item2));
             if (newObj == null)
             {
                 throw new NullReferenceException("One or more types required by the constructor have not been registered");
@@ -44,37 +44,37 @@ namespace IocContainer
             return newObj;
         }
 
-        private T GenerateObject<T>(Type resolvedType)
+        private IEnumerable<ConstructorInfo> GetValidConstructors<T>(Type resolvedType)
         {
             var types = _cache.Select(x => x.Item2).ToList();
             var valid = true;
             var validConstructors = new List<ConstructorInfo>();
             foreach(var t in resolvedType.GetConstructors())
             {
-                if (t.GetParameters().Any(p => 
-                        types.All(x => x.ReflectedType != p.GetType().ReflectedType)))
+                if (t.GetParameters().Any(p => types.All(x => x.ReflectedType != p.GetType().ReflectedType)))
                 {
                     valid = false;
                 }
                 if (valid)
+                {
                     validConstructors.Add(t);
+                }
             }
 
-            return ResolveParameters<T>(resolvedType, validConstructors);
+            return validConstructors;
         }
 
-        private T ResolveParameters<T>(Type resolvedType, List<ConstructorInfo> validConstructors)
+        private T GenerateObject<T>(Type resolvedType, IEnumerable<ConstructorInfo> validConstructors)
         {
             _resolvingParams = true;
-            for (int i = 0; i < validConstructors.Count; i++)
+            foreach (var parameters in validConstructors.Select(t => t.GetParameters().Select(x => x.ParameterType).ToArray()))
             {
-                var parameters = validConstructors[i].GetParameters().Select(x => x.ParameterType).ToArray();
                 if (!parameters.Any())
                 {
                     return (T) Activator.CreateInstance(resolvedType, new object[] {});
                 }
 
-                object[] paramObjects = GenerateParamaters(parameters).ToArray();
+                var paramObjects = GenerateParamaters(parameters).ToArray();
                 if (paramObjects.Length > 0)
                 {
                     return (T) Activator.CreateInstance(resolvedType, paramObjects);
@@ -89,9 +89,8 @@ namespace IocContainer
         {
             var resolveMethod = paramTypes.Select(param => typeof (Container)
                 .GetMethod("Resolve")).First();
-                
-
             var paramaters = new List<object>();
+
             foreach (var param in paramTypes)
             {
                 resolveMethod.MakeGenericMethod(param);
