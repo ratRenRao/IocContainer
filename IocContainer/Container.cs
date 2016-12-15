@@ -68,7 +68,7 @@ namespace IocContainer
             _resolvingParams = true;
             for (int i = 0; i < validConstructors.Count; i++)
             {
-                var parameters = validConstructors[i++].GetParameters().Select(x => x.ParameterType).ToArray();
+                var parameters = validConstructors[i].GetParameters().Select(x => x.ParameterType).ToArray();
                 if (!parameters.Any())
                 {
                     return (T) Activator.CreateInstance(resolvedType, new object[] {});
@@ -98,7 +98,7 @@ namespace IocContainer
                 paramaters.Add(resolveMethod.MakeGenericMethod(param).Invoke(this, new object[] {}));
             }
 
-            return paramaters.Any(x => x == null) ? null : paramaters;
+            return paramaters.Any(x => x == null) ? new List<object>() : paramaters;
         }
     }
 
