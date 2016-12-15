@@ -10,6 +10,7 @@ namespace IocContainer
     {
         private readonly List<Tuple<Type, Type, LifestyleType>> _cache = new List<Tuple<Type, Type, LifestyleType>>();
         private readonly List<Tuple<Type, Type, object>> _singletons = new List<Tuple<Type, Type, object>>();
+        private bool _resolvingParams = false;
 
         public void Register<T, V>(LifestyleType lifestyle = LifestyleType.Transient) where V : T
         {
@@ -21,7 +22,10 @@ namespace IocContainer
             var tuple = _cache.SingleOrDefault(x => x.Item1 == typeof(T));
             if (tuple == null)
             {
-                throw new NullReferenceException("Specified type has not been registered with the container");
+                if(_resolvingParams)
+                    return default(T);
+
+                throw new NullReferenceException("The requested type has not been registered.");
             }
 
             if(tuple.Item3 == LifestyleType.Transient)
@@ -31,6 +35,11 @@ namespace IocContainer
             if (resolved != null) return (T) resolved.Item3;
 
             var newObj = GenerateObject<T>(tuple.Item2);
+            if (newObj == null)
+            {
+                throw new NullReferenceException("One or more types required by the constructor have not been registered");
+            }
+
             _singletons.Add(new Tuple<Type, Type, object>(tuple.Item1, tuple.Item2, newObj));
             return newObj;
         }
@@ -51,19 +60,29 @@ namespace IocContainer
                     validConstructors.Add(t);
             }
 
-            if (!validConstructors.Any())
+            return ResolveParameters<T>(resolvedType, validConstructors);
+        }
+
+        private T ResolveParameters<T>(Type resolvedType, List<ConstructorInfo> validConstructors)
+        {
+            _resolvingParams = true;
+            for (int i = 0; i < validConstructors.Count; i++)
             {
-                throw new NullReferenceException($"One or more types required by the constructor have not been registered");
+                var parameters = validConstructors[i++].GetParameters().Select(x => x.ParameterType).ToArray();
+                if (!parameters.Any())
+                {
+                    return (T) Activator.CreateInstance(resolvedType, new object[] {});
+                }
+
+                object[] paramObjects = GenerateParamaters(parameters).ToArray();
+                if (paramObjects.Length > 0)
+                {
+                    return (T) Activator.CreateInstance(resolvedType, paramObjects);
+                }
             }
 
-            var parameters = validConstructors[0].GetParameters().Select(x => x.ParameterType).ToArray();
-            if (!parameters.Any())
-            {
-                return (T) Activator.CreateInstance(resolvedType, new object[] {});
-            }
-
-            object[] paramObjects = GenerateParamaters(parameters).ToArray();
-            return (T) Activator.CreateInstance(resolvedType, paramObjects);
+            _resolvingParams = false;
+            return default(T);
         }
 
         private IEnumerable<object> GenerateParamaters(Type[] paramTypes)
@@ -79,7 +98,7 @@ namespace IocContainer
                 paramaters.Add(resolveMethod.MakeGenericMethod(param).Invoke(this, new object[] {}));
             }
 
-            return paramaters;
+            return paramaters.Any(x => x == null) ? null : paramaters;
         }
     }
 

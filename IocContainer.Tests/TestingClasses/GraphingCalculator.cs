@@ -10,5 +10,11 @@
             _calculator = calculator;
             _scientificCalculator = scientificCalculator;
         }
+
+        public GraphingCalculator(ICalculator calculator)
+        {
+            _calculator = calculator;
+            _scientificCalculator = new ScientificCalculator(calculator);
+        }
     }
 }

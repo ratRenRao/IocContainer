@@ -61,17 +61,12 @@ namespace IocContainer.Tests
         }
 
         [Fact]
-        public void resolve_fails_when_no_valid_constructors_found()
-        {
-            _container.Register<IGraphingCalculator, GraphingCalculator>();
-            _container.Register<IScientificCalculator, ScientificCalculator>();
-            Should.Throw<Exception>(() => _container.Resolve<IGraphingCalculator>());
-        }
-
-        [Fact]
         public void container_attempts_autoresolve_for_all_constructors()
         {
-            
+            _container.Register<IGraphingCalculator, GraphingCalculator>();
+            _container.Register<ICalculator, Calculator>();
+            IGraphingCalculator result = _container.Resolve<IGraphingCalculator>();
+            result.ShouldNotBeNull();
         }
     }
 }
