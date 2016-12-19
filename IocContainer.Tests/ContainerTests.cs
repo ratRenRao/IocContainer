@@ -5,11 +5,11 @@ using Shouldly;
 
 namespace IocContainer.Tests
 {
-    public class TransientContainerTests
+    public class ContainerTests
     {
         private readonly Container _container;
 
-        public TransientContainerTests()
+        public ContainerTests()
         {
             _container = new Container();
         }

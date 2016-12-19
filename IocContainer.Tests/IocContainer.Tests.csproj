@@ -35,22 +35,18 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Castle.Core">
-      <HintPath>..\packages\Castle.Core\lib\net45\Castle.Core.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Moq">
-      <HintPath>..\packages\Moq\lib\net45\Moq.dll</HintPath>
-    </Reference>
     <Reference Include="Shouldly">
       <HintPath>..\..\..\Visual Studio 2015\Projects\FubuTutorial\packages\Shouldly\lib\net451\Shouldly.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="xunit.abstractions">
-      <HintPath>..\..\..\Visual Studio 2015\Projects\FubuTutorial\packages\xunit.abstractions\lib\net35\xunit.abstractions.dll</HintPath>
+    <Reference Include="xunit.abstractions, Version=2.0.0.0, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\GeneticAlgorithms\packages\xunit.abstractions\lib\net35\xunit.abstractions.dll</HintPath>
     </Reference>
-    <Reference Include="xunit.core">
-      <HintPath>..\..\..\Visual Studio 2015\Projects\FubuTutorial\packages\xunit.extensibility.core\lib\portable-net45+win8+wp8+wpa81\xunit.core.dll</HintPath>
+    <Reference Include="xunit.core, Version=2.1.0.3179, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\GeneticAlgorithms\packages\xunit.extensibility.core\lib\dotnet\xunit.core.dll</HintPath>
     </Reference>
     <Reference Include="xunit.execution.desktop">
       <HintPath>..\packages\xunit.extensibility.execution\lib\net45\xunit.execution.desktop.dll</HintPath>
@@ -62,11 +58,7 @@
         <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
       </ItemGroup>
     </When>
-    <Otherwise>
-      <ItemGroup>
-        <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework" />
-      </ItemGroup>
-    </Otherwise>
+    <Otherwise />
   </Choose>
   <ItemGroup>
     <Compile Include="TestingClasses\Calculator.cs" />
@@ -77,7 +69,7 @@
     <Compile Include="TestingClasses\IGraphingCalculator.cs" />
     <Compile Include="TestingClasses\IScientificCalculator.cs" />
     <Compile Include="TestingClasses\ScientificCalculator.cs" />
-    <Compile Include="TransientContainerTests.cs" />
+    <Compile Include="ContainerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
