@@ -1,5 +1,6 @@
 ﻿using System;
 using IocContainer.Tests.TestingClasses;
+using IocContainer;
 using Xunit;
 using Shouldly;
 
@@ -7,7 +8,7 @@ namespace IocContainer.Tests
 {
     public class ContainerTests
     {
-        private readonly Container _container;
+        private readonly IContainer _container;
 
         public ContainerTests()
         {

@@ -51,7 +51,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Container.cs" />
-    <Compile Include="IIocContainer.cs" />
+    <Compile Include="IContainer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

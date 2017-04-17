@@ -6,11 +6,16 @@ using System.Reflection;
 
 namespace IocContainer
 {
-    public class Container
+    public class Container : IContainer
     {
         private readonly List<Tuple<Type, Type, LifestyleType>> _cache = new List<Tuple<Type, Type, LifestyleType>>();
         private readonly List<Tuple<Type, Type, object>> _singletons = new List<Tuple<Type, Type, object>>();
         private bool _resolvingParams;
+
+        public void Register<T, TV>() where TV : T
+        {
+            Register<T, TV>(LifestyleType.Transient);
+        }
 
         public void Register<T, TV>(LifestyleType lifestyle = LifestyleType.Transient) where TV : T
         {
