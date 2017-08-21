@@ -10,6 +10,6 @@ namespace IocContainer
     {
         void Register<T, TV>() where TV : T;
         void Register<T, TV>(LifestyleType lifestyleType) where TV : T;
-        dynamic Resolve<TV>();
+        TV Resolve<TV>();
     }
 }

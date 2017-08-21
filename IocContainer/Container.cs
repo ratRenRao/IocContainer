@@ -17,12 +17,12 @@ namespace IocContainer
             Register<T, TV>(LifestyleType.Transient);
         }
 
-        public void Register<T, TV>(LifestyleType lifestyle = LifestyleType.Transient) where TV : T
+        public void Register<T, TV>(LifestyleType lifestyle) where TV : T
         {
             _cache.Add(new Tuple<Type, Type, LifestyleType>(typeof(T), typeof(TV), lifestyle));
         }
 
-        public dynamic Resolve<T>()
+        public T Resolve<T>()
         {
             var tuple = _cache.SingleOrDefault(x => x.Item1 == typeof(T));
             if (tuple == null)
@@ -39,7 +39,7 @@ namespace IocContainer
                 if (resolved != null) return (T) resolved.Item3;
             }
 
-            var newObj = GenerateObject<T>(tuple.Item2, GetValidConstructors<T>(tuple.Item2));
+            var newObj = GenerateObject<T>(tuple.Item2, GetValidConstructors(tuple.Item2));
             if (newObj == null)
             {
                 throw new NullReferenceException("One or more types required by the constructor have not been registered");
@@ -49,7 +49,7 @@ namespace IocContainer
             return newObj;
         }
 
-        private IEnumerable<ConstructorInfo> GetValidConstructors<T>(Type resolvedType)
+        private IEnumerable<ConstructorInfo> GetValidConstructors(Type resolvedType)
         {
             var types = _cache.Select(x => x.Item2).ToList();
             var valid = true;

@@ -25,9 +25,9 @@ namespace IocContainer.Tests
         public void container_resolves_the_same_object_for_singleton_lifestyletypes()
         {
             _container.Register<ICalculator, Calculator>(LifestyleType.Singleton);
-            Calculator resolved1 = _container.Resolve<ICalculator>();
+            ICalculator resolved1 = _container.Resolve<ICalculator>();
             resolved1.ShouldNotBeNull();
-            Calculator resolved2 = _container.Resolve<ICalculator>();
+            ICalculator resolved2 = _container.Resolve<ICalculator>();
             resolved1.ShouldNotBeNull();
             resolved2.ShouldNotBeNull();
             resolved1.ShouldBeSameAs(resolved2);
@@ -37,8 +37,8 @@ namespace IocContainer.Tests
         public void container_resolves_new_object_for_transient_lifestyletypes()
         {
             _container.Register<ICalculator, Calculator>(LifestyleType.Transient);
-            Calculator resolved1 = _container.Resolve<ICalculator>();
-            Calculator resolved2 = _container.Resolve<ICalculator>();
+            ICalculator resolved1 = _container.Resolve<ICalculator>();
+            ICalculator resolved2 = _container.Resolve<ICalculator>();
             resolved1.ShouldNotBeNull();
             resolved2.ShouldNotBeNull();
             resolved1.ShouldNotBeSameAs(resolved2);
@@ -55,7 +55,7 @@ namespace IocContainer.Tests
         {
             _container.Register<ICalculator, Calculator>();
             _container.Register<IScientificCalculator, ScientificCalculator>();
-            ScientificCalculator result = _container.Resolve<IScientificCalculator>();
+            IScientificCalculator result = _container.Resolve<IScientificCalculator>();
             result.ShouldNotBeNull();
         }
 
